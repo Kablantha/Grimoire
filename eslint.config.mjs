@@ -5,5 +5,11 @@ import tseslint from "typescript-eslint";
 export default defineConfig([
   js.configs.recommended,
   ...tseslint.configs.recommended,
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "build/**",
+    "src/generated/prisma/**",
+    "next-env.d.ts",
+  ]),
 ]);

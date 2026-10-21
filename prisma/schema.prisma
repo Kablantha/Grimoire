@@ -1,0 +1,267 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TaskStatus {
+  active
+  completed
+  archived
+
+  @@map("task_status")
+}
+
+enum TaskPriority {
+  must_do
+  should_do
+  could_do
+  whenever
+
+  @@map("task_priority")
+}
+
+enum TaskDependencyType {
+  hard
+  soft
+
+  @@map("task_dependency_type")
+}
+
+enum TaskVariantType {
+  minimum
+
+  @@map("task_variant_type")
+}
+
+enum AcademicTaskType {
+  reading
+  assignment
+  discussion
+  quiz
+  exam
+  project
+  study
+  other
+
+  @@map("academic_task_type")
+}
+
+enum EnergyTerminology {
+  energy
+  spoons
+  spell_slots
+  battery
+
+  @@map("energy_terminology")
+}
+
+enum PlanningStyle {
+  gentle
+  balanced
+  full
+
+  @@map("planning_style")
+}
+
+model User {
+  id                     String            @id @default(uuid()) @db.Uuid
+  name                   String?
+  timezone               String            @default("UTC")
+  studentFeaturesEnabled Boolean           @default(false) @map("student_features_enabled")
+  energyTerminology      EnergyTerminology @default(energy) @map("energy_terminology")
+  planningStyle          PlanningStyle     @default(balanced) @map("planning_style")
+  typicalEnergyByDay     Json?             @map("typical_energy_by_day") @db.JsonB
+  preferences            Json?             @db.JsonB
+  createdAt              DateTime          @default(now()) @map("created_at")
+  updatedAt              DateTime          @updatedAt @map("updated_at")
+  tasks                  Task[]
+  energyTypes            EnergyType[]
+  projects               Project[]
+  categories             Category[]
+  courses                Course[]
+  instructors            Instructor[]
+
+  @@map("users")
+}
+
+model Task {
+  id                String            @id @default(uuid()) @db.Uuid
+  userId            String            @map("user_id") @db.Uuid
+  title             String
+  description       String?
+  status            TaskStatus        @default(active)
+  priority          TaskPriority?
+  estimatedMinutes  Int?              @map("estimated_minutes")
+  energyLevel       Int?              @map("energy_level")
+  dueAt             DateTime?         @map("due_at")
+  earliestStartAt   DateTime?         @map("earliest_start_at")
+  manuallyScheduled Boolean           @default(false) @map("manually_scheduled")
+  academicTaskType  AcademicTaskType? @map("academic_task_type")
+  categoryId        String?           @map("category_id") @db.Uuid
+  projectId         String?           @map("project_id") @db.Uuid
+  courseId          String?           @map("course_id") @db.Uuid
+  parentTaskId      String?           @map("parent_task_id") @db.Uuid
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+  completedAt       DateTime?         @map("completed_at")
+  archivedAt        DateTime?         @map("archived_at")
+
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category          Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  project           Project?         @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  course            Course?          @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  parentTask        Task?            @relation("TaskHierarchy", fields: [parentTaskId], references: [id], onDelete: SetNull)
+  childTasks        Task[]           @relation("TaskHierarchy")
+  prerequisiteLinks TaskDependency[] @relation("DependencyPrerequisite")
+  dependentLinks    TaskDependency[] @relation("DependencyDependent")
+  energyTypes       TaskEnergyType[]
+  variants          TaskVariant[]
+
+  @@index([userId, status])
+  @@index([userId, dueAt])
+  @@index([userId, priority])
+  @@index([categoryId])
+  @@index([projectId])
+  @@index([courseId])
+  @@index([parentTaskId])
+  @@map("tasks")
+}
+
+model TaskDependency {
+  id                 String             @id @default(uuid()) @db.Uuid
+  prerequisiteTaskId String             @map("prerequisite_task_id") @db.Uuid
+  dependentTaskId    String             @map("dependent_task_id") @db.Uuid
+  type               TaskDependencyType
+  createdAt          DateTime           @default(now()) @map("created_at")
+
+  prerequisiteTask Task @relation("DependencyPrerequisite", fields: [prerequisiteTaskId], references: [id], onDelete: Cascade)
+  dependentTask    Task @relation("DependencyDependent", fields: [dependentTaskId], references: [id], onDelete: Cascade)
+
+  @@unique([prerequisiteTaskId, dependentTaskId])
+  @@index([dependentTaskId])
+  @@map("task_dependencies")
+}
+
+model TaskVariant {
+  id               String          @id @default(uuid()) @db.Uuid
+  taskId           String          @map("task_id") @db.Uuid
+  type             TaskVariantType @default(minimum)
+  title            String
+  estimatedMinutes Int?            @map("estimated_minutes")
+  energyLevel      Int?            @map("energy_level")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, type])
+  @@map("task_variants")
+}
+
+model EnergyType {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  name           String
+  iconIdentifier String?  @map("icon_identifier")
+  sortOrder      Int      @default(0) @map("sort_order")
+  enabled        Boolean  @default(true)
+  isDefault      Boolean  @default(false) @map("is_default")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  user  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks TaskEnergyType[]
+
+  @@unique([userId, name])
+  @@index([userId, enabled, sortOrder])
+  @@map("energy_types")
+}
+
+model TaskEnergyType {
+  taskId       String @map("task_id") @db.Uuid
+  energyTypeId String @map("energy_type_id") @db.Uuid
+
+  task       Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  energyType EnergyType @relation(fields: [energyTypeId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, energyTypeId])
+  @@index([energyTypeId])
+  @@map("task_energy_types")
+}
+
+model Project {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  name        String
+  description String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  archivedAt  DateTime? @map("archived_at")
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks Task[]
+
+  @@unique([userId, name])
+  @@index([userId, archivedAt])
+  @@map("projects")
+}
+
+model Category {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  name      String
+  color     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks Task[]
+
+  @@unique([userId, name])
+  @@map("categories")
+}
+
+model Course {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  name         String
+  code         String?
+  term         String?
+  startDate    DateTime? @map("start_date")
+  endDate      DateTime? @map("end_date")
+  instructorId String?   @map("instructor_id") @db.Uuid
+  lmsUrl       String?   @map("lms_url")
+  color        String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  instructor Instructor? @relation(fields: [instructorId], references: [id], onDelete: SetNull)
+  tasks      Task[]
+
+  @@unique([userId, code])
+  @@index([instructorId])
+  @@map("courses")
+}
+
+model Instructor {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  name        String
+  email       String?
+  officeHours String?  @map("office_hours")
+  notes       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courses Course[]
+
+  @@index([userId, name])
+  @@map("instructors")
+}
