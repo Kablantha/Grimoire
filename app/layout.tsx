@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Energy Planner",
-  description: "A foundation for realistic, energy-aware planning.",
+  description: "A calm place to make a plan that fits.",
 };
 
 export default function RootLayout({
