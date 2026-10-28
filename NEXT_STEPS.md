@@ -1,12 +1,12 @@
 # Energy Planner Project Status
 
 Current Branch:
-main
+feature/scheduler-foundation
 
 Current Phase:
-Phase 5 - Energy & Capacity
+Phase 6 - Scheduler Foundation
 
-Completed:
+Completed
 
 - Phase 0 Foundation
 - Phase 1 Application Shell
@@ -14,6 +14,7 @@ Completed:
 - Prisma Shadow Database Configuration
 - Phase 3 Core Task System
 - Phase 4 Student Features
+- Phase 5 Energy & Capacity
 
 Current Functionality
 
@@ -22,84 +23,110 @@ Tasks
 - Task editing
 - Task completion
 - Task archive/restore
-- Optional planning details
 - Academic task types
-- PostgreSQL persistence
+- Course associations
+- Energy requirements
 
 Courses
-- Course creation
-- Course editing
+- Course creation/editing
 - Course archive/restore
-- Course details
-- Instructor associations
-- Task associations
+- Instructor management
+- Course task relationships
 
-Instructors
-- Instructor creation
-- Instructor editing
-- Optional office hours
-- Optional notes
+Energy & Capacity
+- Daily capacity tracking
+- Capacity history
+- Energy-type tracking
+- Optional observations
+- Capacity persistence
+- Calm observational UI
 
 Platform
-- PostgreSQL + Prisma
-- Accessible navigation
+- PostgreSQL
+- Prisma migrations
 - Responsive layouts
-- Test coverage
+- Accessibility support
 - Development-user architecture
 
 Known Technical Notes
 
-- Prisma/pg adapter emits an existing deprecation warning during tests.
-- npm emits inherited "Unknown global config 'tmp'" warning.
+- Prisma/pg adapter deprecation warning exists during tests.
+- npm "tmp" configuration warning exists.
 - Neither warning currently affects functionality.
 - ensureDevelopmentUser still runs from the layout request path and should be reviewed later.
 
-Future UX Review
+## Version 1.01 Candidates
 
-## Due Date Presentation
+### Due Date UX
 
-Current behavior can show technically valid but often meaningless timestamps.
+Problem:
+Date-only deadlines can display technically correct but often meaningless timestamps.
+
+Potential approach:
+
+- Due date visible by default.
+- Due time hidden behind optional disclosure.
+- End-of-day defaults remain hidden.
+- Explicitly chosen times remain visible.
+
+Goal:
+Show only meaningful deadline information.
+
+Status:
+Version 1.01 review item.
+
+### Capacity Check-In UX
+
+Current behavior:
+Saved capacity display and editing controls remain visible simultaneously.
+
+Potential future interaction:
+
+Display
+→ Update Capacity
+→ Edit
+→ Save
+→ Display
+
+Possible refinement:
+Make displayed capacity directly editable.
 
 Example:
 
-Thursday, October 29, 2026 at 12:28 PM
+Mental     ●●○○○
 
-Future review should distinguish:
+Clicking the row reveals:
 
-Date-only deadlines:
-- Oct 29
-- Thu, Oct 29
+[1] [2] [3] [4] [5]
 
-Date and time deadlines:
-- Oct 29 • 11:59 PM
-- Thu, Oct 29 • 9:00 AM
+Goals:
+- Reduce duplication
+- Reduce cognitive load
+- Preserve low-friction updates
+- Maintain accessibility
+
+Status:
+Version 1.01 review item.
+
+### Task Card Polish
+
+Task cards are significantly improved.
+
+Potential future review:
+
+- spacing adjustments
+- card click behavior
+- Details-link treatment
+- metadata density
+
+Not considered blockers.
+
+Future Ideas
+
+### Student Hub
 
 Goal:
-Show only information that is meaningful to planning decisions.
-
-This is currently considered a display problem rather than a scheduling problem.
-
-Future scheduling logic should not assume every due date has a meaningful time component.
-
-## Task Card Polish
-
-Phase 4 improved hierarchy significantly.
-
-Future review may revisit:
-- overall spacing
-- density of metadata
-- card click behavior vs Details link
-- course metadata presentation
-
-None of these are considered blockers.
-
-Future Idea: Student Hub
-
-Goal:
-Create a friendly layer over existing academic systems.
-
-Problem:
-Academic information exists but is often difficult to navigate and emotionally overwhelming.
+Create a friendlier layer over existing academic systems.
 
 Potential Features:
 - Class schedules
@@ -109,14 +136,12 @@ Potential Features:
 - Graduation progress
 - Academic reference information
 - Advisor notes
-- Optional degree planning
 
 Principles:
-- Entirely optional
+- Optional
 - Manual entry first
 - Imports later
-- Present information more clearly than existing institutional systems
-- Reduce cognitive load
+- Reduced cognitive load
 
 The goal is not to replace campus systems.
 
@@ -124,18 +149,18 @@ The goal is to make them easier to understand.
 
 Upcoming Phase
 
-Phase 5 - Energy & Capacity
+Phase 6 - Scheduler Foundation
 
 Goals:
-- Capacity modeling
-- Energy-aware planning
-- Energy-type planning support
-- Capacity concepts
-- Foundations for future scheduling
+- Scheduler architecture
+- Scheduling data model
+- Capacity-aware scheduling rules
+- Task placement logic
+- Foundation before recommendations
 
 Not Yet Implemented
 
-- Automatic scheduling
+- Automatic scheduling UI
 - Dependency workflows
 - Week planning
 - Survival Mode
@@ -143,10 +168,9 @@ Not Yet Implemented
 - Deadline Intervention
 - Calendar integration
 - Authentication
-- Mobile apps
 - Student Hub
-- Degree planning
-- Import tools
+- Degree planning imports
+- Mobile apps
 
 Product Philosophy
 
@@ -156,39 +180,15 @@ Energy Planner should remain:
 - supportive
 - accessible
 - low-pressure
+- capacity-aware
 
 Monetization Philosophy
 
 - Web application remains free.
 - No subscription model.
-- Optional donations may help cover development and hosting costs.
+- Optional donations may cover hosting and development costs.
 - Donations do not unlock features.
 - Donations do not create user tiers.
 - Core functionality remains available regardless of support level.
 
 Possible future mobile apps may use a one-time purchase model while keeping the web application free.
-
-## Version 1.01 Candidates
-
-### Due Date UX
-
-Problem:
-Date-only deadlines currently display technically correct timestamps
-that are often not meaningful.
-
-Example:
-Thu, Oct 29, 12:28 PM
-
-Potential future approach:
-
-- Due date visible by default.
-- Due time hidden behind optional disclosure.
-- If user does not specify a time, default internally to end-of-day.
-- Hide end-of-day times from normal display.
-- Display time only when explicitly set by the user.
-
-Goal:
-Reduce cognitive load while preserving support for true time-specific deadlines.
-
-Status:
-Post-v1 review item.
