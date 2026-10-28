@@ -11,6 +11,17 @@ import {
   TaskRelationshipError,
   updateTask,
 } from "../../../src/lib/tasks/task-repository";
+import {
+  addDependency,
+  DependencyTaskError,
+  removeDependency,
+} from "../../../src/lib/tasks/dependency-repository";
+import {
+  CircularDependencyError,
+  DuplicateDependencyError,
+  SelfDependencyError,
+} from "../../../src/domain/scheduler/dependency-graph";
+import { TaskDependencyType } from "../../../src/generated/prisma/enums";
 import { prisma } from "../../../src/lib/prisma";
 
 function formValue(formData: FormData, name: string): string {
@@ -175,4 +186,49 @@ export async function archiveTaskAction(formData: FormData) {
 
 export async function restoreTaskAction(formData: FormData) {
   await updateTaskStatus(formData, TaskStatus.active);
+}
+
+const UUID_PATTERN = /^[0-9a-f-]{36}$/i;
+
+export type DependencyActionState = {
+  status: "idle" | "error" | "success";
+  message?: string;
+};
+
+export async function addDependencyAction(
+  dependentTaskId: string,
+  _previousState: DependencyActionState,
+  formData: FormData,
+): Promise<DependencyActionState> {
+  const prerequisiteTaskId = formValue(formData, "prerequisiteTaskId");
+  if (!UUID_PATTERN.test(prerequisiteTaskId) || !UUID_PATTERN.test(dependentTaskId)) {
+    return { status: "error", message: "Choose a task first." };
+  }
+
+  try {
+    const user = await ensureDevelopmentUser(prisma);
+    await addDependency(prisma, user.id, prerequisiteTaskId, dependentTaskId, TaskDependencyType.hard);
+    await refreshTaskPaths(dependentTaskId);
+    return { status: "success", message: "Dependency added." };
+  } catch (error) {
+    if (
+      error instanceof CircularDependencyError ||
+      error instanceof DuplicateDependencyError ||
+      error instanceof SelfDependencyError ||
+      error instanceof DependencyTaskError
+    ) {
+      return { status: "error", message: error.message };
+    }
+    return { status: "error", message: "I couldn't add that dependency. Nothing was changed." };
+  }
+}
+
+export async function removeDependencyAction(formData: FormData) {
+  const dependentTaskId = formValue(formData, "dependentTaskId");
+  const prerequisiteTaskId = formValue(formData, "prerequisiteTaskId");
+  if (!UUID_PATTERN.test(dependentTaskId) || !UUID_PATTERN.test(prerequisiteTaskId)) return;
+
+  const user = await ensureDevelopmentUser(prisma);
+  const removed = await removeDependency(prisma, user.id, prerequisiteTaskId, dependentTaskId);
+  if (removed) await refreshTaskPaths(dependentTaskId);
 }

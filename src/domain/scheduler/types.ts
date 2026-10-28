@@ -17,6 +17,11 @@ export type SchedulableTask = {
   academicTaskType: AcademicTaskType | null;
   /** Names of the energy types this task draws on (e.g. "Mental", "Social"). */
   energyTypeNames: string[];
+  /**
+   * IDs of prerequisite tasks that must be completed before this one. A task
+   * with incomplete hard prerequisites is not eligible (SCHEDULER_SPEC DEP-001).
+   */
+  hardPrerequisiteIds: string[];
 };
 
 /**
@@ -39,4 +44,6 @@ export type SchedulingContext = {
   now: Date;
   /** The capacity for the day being evaluated, if any has been recorded. */
   capacity: DayCapacity | null;
+  /** Statuses of other tasks, used to evaluate dependency completion. */
+  taskStatuses: Record<string, TaskStatus>;
 };

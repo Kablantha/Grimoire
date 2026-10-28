@@ -9,6 +9,7 @@ import {
   checkMissingDuration,
   checkMissingEnergy,
   checkNoCapacity,
+  checkPrerequisites,
 } from "./rules";
 
 /**
@@ -27,10 +28,13 @@ export function evaluateTaskEligibility(
   context: SchedulingContext,
 ): TaskEligibility {
   // Hard exclusions: these make the task non-schedulable regardless of fit.
+  // An incomplete hard prerequisite is not a fit problem — the task simply
+  // cannot begin yet (DEP-001).
   const exclusionReasons = [
     checkCompleted(task),
     checkArchived(task),
     checkDeadline(task, context),
+    checkPrerequisites(task, context),
   ].filter((reason) => reason !== null);
 
   if (exclusionReasons.length > 0) {

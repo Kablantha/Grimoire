@@ -11,6 +11,16 @@ const taskInclude = {
       energyType: { select: { id: true, name: true, sortOrder: true } },
     },
   },
+  prerequisiteLinks: {
+    include: {
+      dependentTask: { select: { id: true, title: true, status: true } },
+    },
+  },
+  dependentLinks: {
+    include: {
+      prerequisiteTask: { select: { id: true, title: true, status: true } },
+    },
+  },
   variants: {
     where: { type: TaskVariantType.minimum },
     select: { id: true, title: true, estimatedMinutes: true, energyLevel: true },

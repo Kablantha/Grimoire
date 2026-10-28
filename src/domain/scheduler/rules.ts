@@ -30,6 +30,23 @@ export function checkDeadline(
 }
 
 /**
+ * A task with one or more incomplete hard prerequisites is not eligible to be
+ * scheduled (SCHEDULER_SPEC DEP-001). The prerequisite must be completed
+ * first. This is a hard exclusion.
+ */
+export function checkPrerequisites(
+  task: SchedulableTask,
+  context: SchedulingContext,
+): SchedulingReason | null {
+  const incomplete = task.hardPrerequisiteIds.filter(
+    (id) => context.taskStatuses[id] !== "completed",
+  );
+  return incomplete.length > 0
+    ? { code: "prerequisite_incomplete", prerequisiteTaskIds: incomplete }
+    : null;
+}
+
+/**
  * A task with a deadline but no estimated duration cannot be honestly
  * evaluated for fit. Per SCHEDULER_SPEC section 28, unknown duration is
  * missing data, not zero.

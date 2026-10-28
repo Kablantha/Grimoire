@@ -1,6 +1,7 @@
 import type { TaskEligibility } from "./eligibility-result";
 import { evaluateTaskEligibility } from "./eligibility";
 import type { DayCapacity, SchedulableTask, SchedulingContext } from "./types";
+import type { TaskStatus } from "../../generated/prisma/enums";
 
 /**
  * The scheduler service is the single entry point for scheduling evaluation.
@@ -33,6 +34,15 @@ export function eligibleTasks(
   return evaluateTasks(tasks, context).filter((result) => result.canSchedule);
 }
 
-export function buildContext(now: Date, capacity: DayCapacity | null): SchedulingContext {
-  return { now, capacity };
+export function buildContext(
+  now: Date,
+  capacity: DayCapacity | null,
+  taskStatuses: Record<string, TaskStatus> = {},
+): SchedulingContext {
+  return { now, capacity, taskStatuses };
+}
+
+/** Builds the status lookup the eligibility engine needs from a task list. */
+export function taskStatusesOf(tasks: SchedulableTask[]): Record<string, TaskStatus> {
+  return Object.fromEntries(tasks.map((task) => [task.id, task.status]));
 }

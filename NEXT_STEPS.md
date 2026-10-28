@@ -1,10 +1,10 @@
 # Energy Planner Project Status
 
 Current Branch:
-feature/scheduler-foundation
+main
 
 Current Phase:
-Phase 6 - Scheduler Foundation
+Phase 7 - Dependencies & Scheduling Constraints
 
 Completed
 
@@ -15,153 +15,119 @@ Completed
 - Phase 3 Core Task System
 - Phase 4 Student Features
 - Phase 5 Energy & Capacity
+- Phase 6 Scheduler Foundation
 
 Current Functionality
 
 Tasks
 - Quick Add
-- Task editing
-- Task completion
-- Task archive/restore
+- Editing
+- Completion
+- Archive/restore
 - Academic task types
 - Course associations
 - Energy requirements
 
 Courses
-- Course creation/editing
-- Course archive/restore
+- Course management
 - Instructor management
-- Course task relationships
+- Academic metadata
 
-Energy & Capacity
+Capacity
 - Daily capacity tracking
 - Capacity history
-- Energy-type tracking
-- Optional observations
-- Capacity persistence
-- Calm observational UI
+- Energy observations
+- Per-type capacity
 
-Platform
-- PostgreSQL
-- Prisma migrations
-- Responsive layouts
-- Accessibility support
-- Development-user architecture
+Scheduler Foundation
+- Eligibility engine
+- Constraint evaluation
+- Capacity-aware logic
+- Deadline evaluation
+- Energy fit evaluation
+- Scheduler service layer
+- Deterministic rule evaluation
 
 Known Technical Notes
 
 - Prisma/pg adapter deprecation warning exists during tests.
 - npm "tmp" configuration warning exists.
-- Neither warning currently affects functionality.
-- ensureDevelopmentUser still runs from the layout request path and should be reviewed later.
+- ensureDevelopmentUser still runs from the layout request path.
 
-## Version 1.01 Candidates
+Version 1.01 Candidates
 
-### Due Date UX
+## Due Date UX
 
 Problem:
-Date-only deadlines can display technically correct but often meaningless timestamps.
+Date-only deadlines may display unnecessary timestamps.
 
-Potential approach:
-
-- Due date visible by default.
-- Due time hidden behind optional disclosure.
-- End-of-day defaults remain hidden.
-- Explicitly chosen times remain visible.
-
-Goal:
-Show only meaningful deadline information.
+Potential solution:
+- Date-first UI
+- Optional time disclosure
+- Hide implicit end-of-day times
+- Show explicitly chosen times
 
 Status:
 Version 1.01 review item.
 
-### Capacity Check-In UX
+## Capacity Check-In UX
 
-Current behavior:
-Saved capacity display and editing controls remain visible simultaneously.
+Problem:
+Display mode and edit mode appear simultaneously.
 
-Potential future interaction:
-
+Potential solution:
 Display
 → Update Capacity
 → Edit
 → Save
 → Display
 
-Possible refinement:
-Make displayed capacity directly editable.
-
-Example:
-
-Mental     ●●○○○
-
-Clicking the row reveals:
-
-[1] [2] [3] [4] [5]
-
-Goals:
-- Reduce duplication
-- Reduce cognitive load
-- Preserve low-friction updates
-- Maintain accessibility
+Future possibility:
+Directly editable capacity rows.
 
 Status:
 Version 1.01 review item.
 
-### Task Card Polish
+## Task Card Polish
 
-Task cards are significantly improved.
-
-Potential future review:
-
-- spacing adjustments
-- card click behavior
-- Details-link treatment
+Potential review:
+- spacing refinements
+- Details behavior
+- click targets
 - metadata density
 
-Not considered blockers.
+Status:
+Version 1.01 review item.
 
 Future Ideas
 
-### Student Hub
+## Student Hub
 
-Goal:
-Create a friendlier layer over existing academic systems.
-
-Potential Features:
+Potential future features:
 - Class schedules
 - LMS links
 - Campus locations
 - Degree requirements
-- Graduation progress
-- Academic reference information
+- Degree progress
 - Advisor notes
 
-Principles:
-- Optional
-- Manual entry first
-- Imports later
-- Reduced cognitive load
-
-The goal is not to replace campus systems.
-
-The goal is to make them easier to understand.
+Goal:
+Make institutional systems friendlier and less overwhelming.
 
 Upcoming Phase
 
-Phase 6 - Scheduler Foundation
+Phase 7 - Dependencies & Scheduling Constraints
 
 Goals:
-- Scheduler architecture
-- Scheduling data model
-- Capacity-aware scheduling rules
-- Task placement logic
-- Foundation before recommendations
+- Task dependency evaluation
+- Dependency graph logic
+- Circular dependency handling
+- Scheduler integration with eligibility engine
 
 Not Yet Implemented
 
-- Automatic scheduling UI
-- Dependency workflows
+- Schedule generation
+- Recommendations
 - Week planning
 - Survival Mode
 - Recovery Mode
@@ -169,13 +135,11 @@ Not Yet Implemented
 - Calendar integration
 - Authentication
 - Student Hub
-- Degree planning imports
 - Mobile apps
 
 Product Philosophy
 
 Energy Planner should remain:
-
 - calm
 - supportive
 - accessible
@@ -185,10 +149,7 @@ Energy Planner should remain:
 Monetization Philosophy
 
 - Web application remains free.
-- No subscription model.
-- Optional donations may cover hosting and development costs.
-- Donations do not unlock features.
-- Donations do not create user tiers.
-- Core functionality remains available regardless of support level.
-
-Possible future mobile apps may use a one-time purchase model while keeping the web application free.
+- No subscriptions.
+- Optional donations only.
+- Donations never unlock features.
+- Core functionality remains available to everyone.

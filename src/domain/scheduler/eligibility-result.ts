@@ -20,6 +20,7 @@ export type SchedulingReasonCode =
   | "task_completed"
   | "task_archived"
   | "deadline_passed"
+  | "prerequisite_incomplete"
   | "missing_duration"
   | "missing_energy"
   | "no_capacity_recorded"
@@ -31,6 +32,8 @@ export type SchedulingReason = {
   code: SchedulingReasonCode;
   /** Energy type names relevant to the reason, when applicable. */
   energyTypeNames?: string[];
+  /** Prerequisite task IDs relevant to the reason, when applicable. */
+  prerequisiteTaskIds?: string[];
 };
 
 export type TaskEligibility = {

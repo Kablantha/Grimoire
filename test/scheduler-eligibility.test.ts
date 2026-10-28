@@ -19,6 +19,7 @@ function makeTask(overrides: Partial<SchedulableTask> = {}): SchedulableTask {
     earliestStartAt: null,
     academicTaskType: null,
     energyTypeNames: [],
+    hardPrerequisiteIds: [],
     ...overrides,
   };
 }
@@ -32,8 +33,11 @@ function makeCapacity(overrides: Partial<DayCapacity> = {}): DayCapacity {
   };
 }
 
-function makeContext(capacity: DayCapacity | null = makeCapacity()): SchedulingContext {
-  return buildContext(NOW, capacity);
+function makeContext(
+  capacity: DayCapacity | null = makeCapacity(),
+  taskStatuses: Record<string, SchedulableTask["status"]> = {},
+): SchedulingContext {
+  return buildContext(NOW, capacity, taskStatuses);
 }
 
 describe("task eligibility — state exclusions", () => {
@@ -185,5 +189,52 @@ describe("scheduler service", () => {
     const task = makeTask({ energyLevel: 4, energyTypeNames: ["Mental"] });
     const context = makeContext(makeCapacity({ overallLevel: 2, byType: { Mental: 1 } }));
     expect(evaluateTaskEligibility(task, context)).toEqual(evaluateTaskEligibility(task, context));
+  });
+});
+
+describe("task eligibility — dependencies", () => {
+  it("blocks a task whose hard prerequisite is incomplete (DEP-001)", () => {
+    const result = evaluateTaskEligibility(
+      makeTask({ id: "response", hardPrerequisiteIds: ["reading"] }),
+      makeContext(makeCapacity(), { reading: "active" }),
+    );
+    expect(result.status).toBe("not_ready");
+    expect(result.canSchedule).toBe(false);
+    const reason = result.reasons.find((r) => r.code === "prerequisite_incomplete");
+    expect(reason?.prerequisiteTaskIds).toEqual(["reading"]);
+  });
+
+  it("unblocks a task once its prerequisite is completed", () => {
+    const task = makeTask({ id: "response", hardPrerequisiteIds: ["reading"] });
+    const blocked = evaluateTaskEligibility(task, makeContext(makeCapacity(), { reading: "active" }));
+    const unblocked = evaluateTaskEligibility(task, makeContext(makeCapacity(), { reading: "completed" }));
+
+    expect(blocked.canSchedule).toBe(false);
+    expect(unblocked.status).toBe("eligible");
+    expect(unblocked.canSchedule).toBe(true);
+  });
+
+  it("requires every prerequisite to be complete when there are several", () => {
+    const task = makeTask({ id: "final", hardPrerequisiteIds: ["a", "b"] });
+    const partial = evaluateTaskEligibility(
+      task,
+      makeContext(makeCapacity(), { a: "completed", b: "active" }),
+    );
+    expect(partial.canSchedule).toBe(false);
+    expect(partial.reasons.find((r) => r.code === "prerequisite_incomplete")?.prerequisiteTaskIds).toEqual(["b"]);
+  });
+
+  it("treats a prerequisite with unknown status as not yet complete", () => {
+    const result = evaluateTaskEligibility(
+      makeTask({ hardPrerequisiteIds: ["missing"] }),
+      makeContext(makeCapacity(), {}),
+    );
+    expect(result.canSchedule).toBe(false);
+    expect(result.reasons.map((r) => r.code)).toContain("prerequisite_incomplete");
+  });
+
+  it("does not report prerequisite reasons for a task with none", () => {
+    const result = evaluateTaskEligibility(makeTask({ hardPrerequisiteIds: [] }), makeContext());
+    expect(result.reasons.map((r) => r.code)).not.toContain("prerequisite_incomplete");
   });
 });

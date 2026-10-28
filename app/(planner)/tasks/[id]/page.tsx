@@ -2,9 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TaskStatus } from "../../../../src/generated/prisma/enums";
 import { ensureDevelopmentUser } from "../../../../src/lib/tasks/development-user";
-import { getTask } from "../../../../src/lib/tasks/task-repository";
+import { getTask, listTasks } from "../../../../src/lib/tasks/task-repository";
 import { prisma } from "../../../../src/lib/prisma";
 import PlaceholderPage from "../../../../components/placeholder-page";
+import TaskDependencies from "../../../../components/tasks/task-dependencies";
 import { archiveTaskAction, completeTaskAction, restoreTaskAction } from "../actions";
 import { formatAcademicTaskType, formatCourseIdentity, MetadataPill, PriorityPill } from "../../../../components/tasks/task-metadata";
 
@@ -28,6 +29,26 @@ export default async function TaskDetailsPage({
   const user = await ensureDevelopmentUser(prisma);
   const task = await getTask(prisma, user.id, id);
   if (!task) notFound();
+
+  const activeTasks = await listTasks(prisma, user.id, TaskStatus.active);
+  // dependentLinks are the edges where this task is the dependent: its
+  // prerequisites. prerequisiteLinks are where it is the prerequisite: its
+  // dependents (the tasks it unlocks).
+  const existingPrerequisiteIds = new Set(task.dependentLinks.map((link) => link.prerequisiteTask.id));
+  const candidates = activeTasks
+    .filter((candidate) => candidate.id !== task.id && !existingPrerequisiteIds.has(candidate.id))
+    .map((candidate) => ({ id: candidate.id, title: candidate.title, status: candidate.status }));
+
+  const prerequisites = task.dependentLinks.map((link) => ({
+    id: link.prerequisiteTask.id,
+    title: link.prerequisiteTask.title,
+    status: link.prerequisiteTask.status,
+  }));
+  const dependents = task.prerequisiteLinks.map((link) => ({
+    id: link.dependentTask.id,
+    title: link.dependentTask.title,
+    status: link.dependentTask.status,
+  }));
 
   return (
     <>
@@ -73,6 +94,13 @@ export default async function TaskDetailsPage({
           </p>
         </section>
       )}
+
+      <TaskDependencies
+        candidates={candidates}
+        dependents={dependents}
+        prerequisites={prerequisites}
+        taskId={task.id}
+      />
 
       <div className="mt-9 flex flex-wrap gap-2 border-t border-[var(--line)] pt-6">
         {task.status !== TaskStatus.archived && (

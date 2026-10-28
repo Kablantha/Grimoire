@@ -20,6 +20,11 @@ export function toSchedulableTask(task: TaskRecord): SchedulableTask {
     earliestStartAt: task.earliestStartAt,
     academicTaskType: task.academicTaskType,
     energyTypeNames: task.energyTypes.map((entry) => entry.energyType.name),
+    // dependentLinks are the edges where this task is the dependent, i.e. its
+    // prerequisites (things that must finish first).
+    hardPrerequisiteIds: task.dependentLinks
+      .filter((link) => link.type === "hard")
+      .map((link) => link.prerequisiteTask.id),
   };
 }
 
