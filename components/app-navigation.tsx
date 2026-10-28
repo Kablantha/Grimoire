@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useQuickAdd } from "./tasks/quick-add-provider";
 
 // Keep Courses visible until Student Features preference state is introduced.
 const SHOW_COURSES_DURING_PHASE_ONE = true;
@@ -32,11 +33,13 @@ function NavigationLink({ href, label }: { href: string; label: string }) {
 }
 
 function AddButton() {
+  const { openQuickAdd } = useQuickAdd();
+
   return (
     <button
-      aria-describedby="quick-add-description"
-      aria-disabled="true"
+      aria-label="Add task"
       className="min-h-11 rounded-md border border-[var(--line)] bg-white px-4 text-sm font-semibold text-[var(--accent)] hover:bg-[var(--accent-soft)]"
+      onClick={(event) => openQuickAdd(event.currentTarget)}
       type="button"
     >
       Add

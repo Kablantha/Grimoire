@@ -42,4 +42,26 @@ describe("CreateTaskInputSchema", () => {
       }).success,
     ).toBe(false);
   });
+
+  it("accepts an optional minimum task variant", () => {
+    expect(
+      CreateTaskInputSchema.safeParse({
+        title: "Write report",
+        minimumVariant: {
+          title: "Write a short outline",
+          estimatedMinutes: 15,
+          energyLevel: 2,
+        },
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects a blank minimum task variant title", () => {
+    expect(
+      CreateTaskInputSchema.safeParse({
+        title: "Write report",
+        minimumVariant: { title: "   " },
+      }).success,
+    ).toBe(false);
+  });
 });

@@ -1,10 +1,25 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { DesktopNavigation, MobileNavigation } from "./app-navigation";
+import QuickAddProvider from "./tasks/quick-add-provider";
+import type { TaskFormOptions } from "../src/lib/tasks/task-repository";
 
-export default function AppShell({ children }: { children: ReactNode }) {
+const EMPTY_TASK_FORM_OPTIONS: TaskFormOptions = {
+  energyTypes: [],
+  categories: [],
+  projects: [],
+  courses: [],
+};
+
+export default function AppShell({
+  children,
+  taskFormOptions = EMPTY_TASK_FORM_OPTIONS,
+}: {
+  children: ReactNode;
+  taskFormOptions?: TaskFormOptions;
+}) {
   return (
-    <>
+    <QuickAddProvider options={taskFormOptions}>
       <a
         className="sr-only z-50 rounded-md bg-white px-4 py-3 text-sm font-semibold text-[var(--ink)] focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
         href="#main-content"
@@ -47,9 +62,6 @@ export default function AppShell({ children }: { children: ReactNode }) {
         </div>
       </div>
       <MobileNavigation />
-      <span className="sr-only" id="quick-add-description">
-        Quick Add will be available in a later phase.
-      </span>
-    </>
+    </QuickAddProvider>
   );
 }
