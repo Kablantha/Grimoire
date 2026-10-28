@@ -3,7 +3,6 @@
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import AppShell from "../components/app-shell";
-import CoursesPage from "../app/(planner)/courses/page";
 import SettingsPage from "../app/(planner)/settings/page";
 import TodayPage from "../app/(planner)/today/page";
 import WeekPage from "../app/(planner)/week/page";
@@ -73,7 +72,7 @@ describe("application shell", () => {
     ["Today", "/today", TodayPage],
     ["Week", "/week", WeekPage],
     ["Tasks", "/tasks", () => <h1>Tasks</h1>],
-    ["Courses", "/courses", CoursesPage],
+    ["Courses", "/courses", () => <h1>Courses</h1>],
     ["Settings", "/settings", SettingsPage],
   ])("renders the %s destination at %s", (title, path, Page) => {
     pathnameMock.mockReturnValue(path);
@@ -102,6 +101,9 @@ describe("application shell", () => {
     const desktopNavigation = screen.getByRole("navigation", {
       name: "Primary navigation",
     });
+    const desktopItems = within(desktopNavigation).getAllByRole("listitem");
+    expect(within(desktopItems[0]).getByRole("button", { name: "Add task" })).toBeTruthy();
+    expect(within(desktopItems[1]).getByRole("link", { name: "Today" })).toBeTruthy();
     for (const destination of ["Today", "Week", "Tasks", "Courses", "Settings"]) {
       expect(within(desktopNavigation).getByRole("link", { name: destination })).toBeTruthy();
     }

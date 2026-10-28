@@ -2,6 +2,7 @@ import Link from "next/link";
 import { TaskStatus } from "../../src/generated/prisma/enums";
 import type { TaskRecord } from "../../src/lib/tasks/task-repository";
 import { archiveTaskAction, completeTaskAction, restoreTaskAction } from "../../app/(planner)/tasks/actions";
+import { formatAcademicTaskType, formatCourseCode, MetadataPill, PriorityPill } from "./task-metadata";
 
 function formatDueDate(value: Date) {
   return new Intl.DateTimeFormat(undefined, {
@@ -61,37 +62,50 @@ export function TaskList({ tasks, status }: { tasks: TaskRecord[]; status: TaskS
   return (
     <ul aria-label={`${status} tasks`} className="mt-6 divide-y divide-[var(--line)] border-y border-[var(--line)] bg-white">
       {tasks.map((task) => (
-        <li className="flex flex-col gap-4 px-4 py-5 sm:flex-row sm:items-start sm:justify-between sm:px-5" key={task.id}>
-          <div className="min-w-0">
-            <h2 className="text-base font-semibold text-[var(--ink)]">
+        <li className="px-4 py-5 sm:px-5" key={task.id}>
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <h2 className="min-w-0 text-base font-semibold text-[var(--ink)]">
               <Link className="rounded-sm underline-offset-4 hover:underline" href={`/tasks/${task.id}`}>
                 {task.title}
               </Link>
             </h2>
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--muted)]">
-              {task.priority && <span>{task.priority.replaceAll("_", " ")}</span>}
-              {task.dueAt && <span>Due {formatDueDate(task.dueAt)}</span>}
-              {task.estimatedMinutes !== null && <span>{task.estimatedMinutes} min</span>}
-              {task.energyLevel !== null && <span>Energy {task.energyLevel} of 5</span>}
-            </div>
+            {task.dueAt && (
+              <p className="shrink-0 text-sm text-[var(--muted)]">Due {formatDueDate(task.dueAt)}</p>
+            )}
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Link className="inline-flex min-h-11 items-center rounded-md border border-[var(--line)] px-3 text-sm font-medium" href={`/tasks/${task.id}`}>
-              Details
-            </Link>
+          <Link className="mt-1 inline-flex min-h-11 items-center text-sm font-medium text-[var(--accent)] underline-offset-4 hover:underline" href={`/tasks/${task.id}`}>
+            Details
+          </Link>
+
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-[var(--muted)]">
+            {task.priority && <PriorityPill priority={task.priority} />}
+            {task.course && (
+              <Link
+                aria-label={`Course: ${formatCourseCode(task.course.code, task.course.name)}`}
+                className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus)]"
+                href={`/courses/${task.course.id}`}
+              >
+                <MetadataPill className="bg-[var(--accent-soft)] text-[var(--accent)]">{formatCourseCode(task.course.code, task.course.name)}</MetadataPill>
+              </Link>
+            )}
+            {task.academicTaskType && <MetadataPill>{formatAcademicTaskType(task.academicTaskType)}</MetadataPill>}
+            {task.energyLevel !== null && <MetadataPill>Energy: {task.energyLevel}</MetadataPill>}
+          </div>
+
+          <div className="mt-3 flex flex-wrap justify-end gap-2">
             {status === TaskStatus.active && (
               <>
+                <form action={archiveTaskAction}>
+                  <input name="taskId" type="hidden" value={task.id} />
+                  <button className="min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-medium text-[var(--muted)]" type="submit">
+                    Archive
+                  </button>
+                </form>
                 <form action={completeTaskAction}>
                   <input name="taskId" type="hidden" value={task.id} />
                   <button className="min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-medium" type="submit">
                     Mark complete
-                  </button>
-                </form>
-                <form action={archiveTaskAction}>
-                  <input name="taskId" type="hidden" value={task.id} />
-                  <button className="min-h-11 rounded-md px-3 text-sm font-medium text-[var(--muted)]" type="submit">
-                    Archive
                   </button>
                 </form>
               </>
@@ -99,7 +113,7 @@ export function TaskList({ tasks, status }: { tasks: TaskRecord[]; status: TaskS
             {status === TaskStatus.completed && (
               <form action={archiveTaskAction}>
                 <input name="taskId" type="hidden" value={task.id} />
-                <button className="min-h-11 rounded-md px-3 text-sm font-medium text-[var(--muted)]" type="submit">
+                <button className="min-h-11 rounded-md border border-[var(--line)] px-3 text-sm font-medium text-[var(--muted)]" type="submit">
                   Archive
                 </button>
               </form>

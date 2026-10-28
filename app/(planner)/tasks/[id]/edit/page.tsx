@@ -17,12 +17,9 @@ export default async function EditTaskPage({
 }) {
   const { id } = await params;
   const user = await ensureDevelopmentUser(prisma);
-  const [task, options] = await Promise.all([
-    getTask(prisma, user.id, id),
-    getTaskFormOptions(prisma, user.id),
-  ]);
-
+  const task = await getTask(prisma, user.id, id);
   if (!task) notFound();
+  const options = await getTaskFormOptions(prisma, user.id, task.courseId);
 
   const minimumVariant = task.variants[0];
 
@@ -41,6 +38,7 @@ export default async function EditTaskPage({
             estimatedMinutes: task.estimatedMinutes,
             energyLevel: task.energyLevel,
             priority: task.priority,
+            academicTaskType: task.academicTaskType,
             categoryId: task.categoryId,
             projectId: task.projectId,
             courseId: task.courseId,

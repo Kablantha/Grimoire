@@ -47,6 +47,8 @@ describe("task form fields", () => {
       "Energy level on a five-level scale from 1 to 5.",
     );
     expect(planningFields.getByRole("combobox", { name: "Priority" })).toBeTruthy();
+    expect(planningFields.getByRole("combobox", { name: "Academic task type" })).toBeTruthy();
+    expect(planningFields.getByRole("option", { name: "Reading" })).toBeTruthy();
   });
 
   it("associates validation errors with their controls and announces them", () => {

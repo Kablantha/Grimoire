@@ -23,7 +23,7 @@ export type TaskFormOptions = {
   energyTypes: { id: string; name: string }[];
   categories: { id: string; name: string }[];
   projects: { id: string; name: string }[];
-  courses: { id: string; name: string; code: string | null }[];
+  courses: { id: string; name: string; code: string | null; archivedAt: Date | null }[];
 };
 
 export class TaskRelationshipError extends Error {
@@ -83,6 +83,7 @@ function splitTaskInput(input: CreateTaskInput) {
 export async function getTaskFormOptions(
   client: PrismaClient,
   userId: string,
+  preserveCourseId?: string | null,
 ): Promise<TaskFormOptions> {
   const [energyTypes, categories, projects, courses] = await Promise.all([
     client.energyType.findMany({
@@ -97,9 +98,14 @@ export async function getTaskFormOptions(
       select: { id: true, name: true },
     }),
     client.course.findMany({
-      where: { userId },
+      where: {
+        userId,
+        ...(preserveCourseId
+          ? { OR: [{ archivedAt: null }, { id: preserveCourseId }] }
+          : { archivedAt: null }),
+      },
       orderBy: { name: "asc" },
-      select: { id: true, name: true, code: true },
+      select: { id: true, name: true, code: true, archivedAt: true },
     }),
   ]);
 
@@ -110,9 +116,10 @@ export async function listTasks(
   client: PrismaClient,
   userId: string,
   status: TaskStatus,
+  courseId?: string,
 ): Promise<TaskRecord[]> {
   return client.task.findMany({
-    where: { userId, status },
+    where: { userId, status, ...(courseId ? { courseId } : {}) },
     include: taskInclude,
     orderBy: { createdAt: "desc" },
   });

@@ -69,6 +69,7 @@ function parseTaskForm(formData: FormData, clearEmpty: boolean) {
     title: formValue(formData, "title"),
     description: optionalText(formValue(formData, "description"), clearEmpty),
     priority: optionalText(formValue(formData, "priority"), clearEmpty),
+    academicTaskType: optionalText(formValue(formData, "academicTaskType"), clearEmpty),
     estimatedMinutes: optionalNumber(formValue(formData, "estimatedMinutes"), clearEmpty),
     energyLevel: optionalNumber(formValue(formData, "energyLevel"), clearEmpty),
     dueAt: localDateTimeToDate(

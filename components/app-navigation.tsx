@@ -42,7 +42,7 @@ function AddButton() {
       onClick={(event) => openQuickAdd(event.currentTarget)}
       type="button"
     >
-      Add
+      Add Task
     </button>
   );
 }
@@ -51,6 +51,9 @@ export function DesktopNavigation() {
   return (
     <nav aria-label="Primary navigation" className="mt-10">
       <ul className="space-y-1">
+        <li>
+          <AddButton />
+        </li>
         {primaryDestinations.map((destination) => (
           <li key={destination.href}>
             <NavigationLink {...destination} />
@@ -61,9 +64,6 @@ export function DesktopNavigation() {
             <NavigationLink href="/courses" label="Courses" />
           </li>
         )}
-        <li>
-          <AddButton />
-        </li>
         <li>
           <NavigationLink href="/settings" label="Settings" />
         </li>

@@ -4,13 +4,14 @@ import "dotenv/config";
 import { randomUUID } from "node:crypto";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
-import { TaskPriority, TaskStatus } from "../src/generated/prisma/enums";
+import { AcademicTaskType, TaskPriority, TaskStatus } from "../src/generated/prisma/enums";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { CreateTaskInputSchema } from "../src/domain/task/create-task-input";
 import {
   changeTaskStatus,
   createTask,
   getTask,
+  getTaskFormOptions,
   listTasks,
   updateTask,
 } from "../src/lib/tasks/task-repository";
@@ -100,6 +101,7 @@ describe("task repository", () => {
         estimatedMinutes: 45,
         energyLevel: 3,
         priority: TaskPriority.should_do,
+        academicTaskType: AcademicTaskType.assignment,
         categoryId: category.id,
         projectId: project.id,
         courseId: course.id,
@@ -117,6 +119,7 @@ describe("task repository", () => {
     expect(task.estimatedMinutes).toBe(45);
     expect(task.energyLevel).toBe(3);
     expect(task.priority).toBe(TaskPriority.should_do);
+    expect(task.academicTaskType).toBe(AcademicTaskType.assignment);
     expect(task.category?.id).toBe(category.id);
     expect(task.project?.id).toBe(project.id);
     expect(task.course?.id).toBe(course.id);
@@ -126,6 +129,23 @@ describe("task repository", () => {
       estimatedMinutes: 15,
       energyLevel: 2,
     });
+  });
+
+  it("hides archived courses from new task choices but keeps a selected archived course available when editing", async () => {
+    const activeCourse = await prisma.course.create({
+      data: { userId, name: "Current course" },
+      select: { id: true },
+    });
+    const archivedCourse = await prisma.course.create({
+      data: { userId, name: "Archived course", archivedAt: new Date() },
+      select: { id: true },
+    });
+
+    const createOptions = await getTaskFormOptions(prisma, userId);
+    const editOptions = await getTaskFormOptions(prisma, userId, archivedCourse.id);
+
+    expect(createOptions.courses.map(({ id }) => id)).toEqual([activeCourse.id]);
+    expect(editOptions.courses.map(({ id }) => id)).toContain(archivedCourse.id);
   });
 
   it("edits supported task fields and preserves the updated task", async () => {

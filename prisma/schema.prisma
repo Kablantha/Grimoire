@@ -239,6 +239,7 @@ model Course {
   color        String?
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
+  archivedAt   DateTime? @map("archived_at")
 
   user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   instructor Instructor? @relation(fields: [instructorId], references: [id], onDelete: SetNull)
@@ -246,6 +247,7 @@ model Course {
 
   @@unique([userId, code])
   @@index([instructorId])
+  @@index([userId, archivedAt])
   @@map("courses")
 }
 

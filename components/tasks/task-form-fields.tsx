@@ -11,6 +11,7 @@ export type TaskFormValues = {
   estimatedMinutes?: number | null;
   energyLevel?: number | null;
   priority?: string | null;
+  academicTaskType?: string | null;
   categoryId?: string | null;
   projectId?: string | null;
   courseId?: string | null;
@@ -193,6 +194,28 @@ export default function TaskFormFields({
               </div>
             </div>
 
+            <div>
+              <label className="mb-2 block text-sm font-medium" htmlFor={`${idPrefix}-academic-task-type`}>
+                Academic task type
+              </label>
+              <select
+                className="min-h-11 w-full rounded-md border border-[var(--line)] bg-white px-3"
+                defaultValue={initialValues?.academicTaskType ?? ""}
+                id={`${idPrefix}-academic-task-type`}
+                name="academicTaskType"
+              >
+                <option value="">Not applicable</option>
+                <option value="reading">Reading</option>
+                <option value="assignment">Assignment</option>
+                <option value="discussion">Discussion</option>
+                <option value="quiz">Quiz</option>
+                <option value="exam">Exam</option>
+                <option value="project">Project</option>
+                <option value="study">Study</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
             {options.energyTypes.length > 0 && (
               <fieldset>
                 <legend className="mb-2 text-sm font-medium">Energy types</legend>
@@ -240,7 +263,7 @@ export default function TaskFormFields({
                 <label className="mb-2 block text-sm font-medium" htmlFor={`${idPrefix}-course`}>Course</label>
                 <select className="min-h-11 w-full rounded-md border border-[var(--line)] bg-white px-3" defaultValue={initialValues?.courseId ?? ""} id={`${idPrefix}-course`} name="courseId">
                   <option value="">No course</option>
-                  {options.courses.map((item) => <option key={item.id} value={item.id}>{item.code ? `${item.code} · ` : ""}{item.name}</option>)}
+                  {options.courses.map((item) => <option key={item.id} value={item.id}>{item.code ? `${item.code}: ` : ""}{item.name}{item.archivedAt ? " (archived)" : ""}</option>)}
                 </select>
               </div>
             )}

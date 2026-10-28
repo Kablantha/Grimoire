@@ -6,6 +6,7 @@ import { getTask } from "../../../../src/lib/tasks/task-repository";
 import { prisma } from "../../../../src/lib/prisma";
 import PlaceholderPage from "../../../../components/placeholder-page";
 import { archiveTaskAction, completeTaskAction, restoreTaskAction } from "../actions";
+import { formatAcademicTaskType, formatCourseIdentity, MetadataPill, PriorityPill } from "../../../../components/tasks/task-metadata";
 
 function formatDueDate(value: Date) {
   return new Intl.DateTimeFormat(undefined, {
@@ -44,18 +45,19 @@ export default async function TaskDetailsPage({
         </section>
       )}
 
-      {(task.dueAt || task.estimatedMinutes !== null || task.energyLevel !== null || task.priority || task.energyTypes.length > 0 || task.category || task.project || task.course) && (
+      {(task.dueAt || task.estimatedMinutes !== null || task.energyLevel !== null || task.priority || task.academicTaskType || task.energyTypes.length > 0 || task.category || task.project || task.course) && (
         <section aria-labelledby="task-planning-heading" className="mt-8 border-t border-[var(--line)] pt-6">
           <h2 className="text-sm font-semibold text-[var(--muted)]" id="task-planning-heading">Planning</h2>
           <dl className="mt-4 grid gap-x-8 gap-y-4 sm:grid-cols-2">
             {task.dueAt && <div><dt className="text-xs text-[var(--muted)]">Due</dt><dd className="mt-1">{formatDueDate(task.dueAt)}</dd></div>}
             {task.estimatedMinutes !== null && <div><dt className="text-xs text-[var(--muted)]">Estimated time</dt><dd className="mt-1">{task.estimatedMinutes} minutes</dd></div>}
-            {task.energyLevel !== null && <div><dt className="text-xs text-[var(--muted)]">Energy</dt><dd className="mt-1">{task.energyLevel} of 5</dd></div>}
-            {task.priority && <div><dt className="text-xs text-[var(--muted)]">Priority</dt><dd className="mt-1">{task.priority.replaceAll("_", " ")}</dd></div>}
-            {task.energyTypes.length > 0 && <div><dt className="text-xs text-[var(--muted)]">Energy types</dt><dd className="mt-1">{task.energyTypes.map(({ energyType }) => energyType.name).join(", ")}</dd></div>}
+            {task.energyLevel !== null && <div><dt className="text-xs text-[var(--muted)]">Energy</dt><dd className="mt-1">{task.energyLevel}</dd></div>}
+            {task.priority && <div><dt className="text-xs text-[var(--muted)]">Priority</dt><dd className="mt-1"><PriorityPill priority={task.priority} /></dd></div>}
+            {task.academicTaskType && <div><dt className="text-xs text-[var(--muted)]">Academic task type</dt><dd className="mt-1"><MetadataPill>{formatAcademicTaskType(task.academicTaskType)}</MetadataPill></dd></div>}
+            {task.energyTypes.length > 0 && <div><dt className="text-xs text-[var(--muted)]">Energy types</dt><dd className="mt-1 flex flex-wrap gap-2">{task.energyTypes.map(({ energyType }) => <MetadataPill key={energyType.id}>{energyType.name}</MetadataPill>)}</dd></div>}
             {task.category && <div><dt className="text-xs text-[var(--muted)]">Category</dt><dd className="mt-1">{task.category.name}</dd></div>}
             {task.project && <div><dt className="text-xs text-[var(--muted)]">Project</dt><dd className="mt-1">{task.project.name}</dd></div>}
-            {task.course && <div><dt className="text-xs text-[var(--muted)]">Course</dt><dd className="mt-1">{task.course.code ? `${task.course.code} · ` : ""}{task.course.name}</dd></div>}
+            {task.course && <div><dt className="text-xs text-[var(--muted)]">Course</dt><dd className="mt-1"><Link className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus)]" href={`/courses/${task.course.id}`}><MetadataPill className="bg-[var(--accent-soft)] text-[var(--accent)]">{formatCourseIdentity(task.course.code, task.course.name)}</MetadataPill></Link></dd></div>}
           </dl>
         </section>
       )}
@@ -67,7 +69,7 @@ export default async function TaskDetailsPage({
           <p className="mt-1 text-sm text-[var(--muted)]">
             {task.variants[0].estimatedMinutes !== null ? `${task.variants[0].estimatedMinutes} minutes` : ""}
             {task.variants[0].estimatedMinutes !== null && task.variants[0].energyLevel !== null ? " · " : ""}
-            {task.variants[0].energyLevel !== null ? `Energy ${task.variants[0].energyLevel} of 5` : ""}
+            {task.variants[0].energyLevel !== null ? `Energy: ${task.variants[0].energyLevel}` : ""}
           </p>
         </section>
       )}
