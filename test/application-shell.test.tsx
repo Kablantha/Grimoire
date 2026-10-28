@@ -4,9 +4,14 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-li
 import { afterEach, describe, expect, it, vi } from "vitest";
 import AppShell from "../components/app-shell";
 import SettingsPage from "../app/(planner)/settings/page";
-import TodayPage from "../app/(planner)/today/page";
 import WeekPage from "../app/(planner)/week/page";
 import HomePage from "../app/page";
+
+// Today is now a data-backed server component (Phase 5), so the shell tests
+// render a lightweight placeholder heading instead of importing the real page.
+function TodayPage() {
+  return <h1>Today</h1>;
+}
 
 const { redirectMock, pathnameMock, pushMock, refreshMock } = vi.hoisted(() => ({
   redirectMock: vi.fn((destination: string) => {

@@ -85,6 +85,7 @@ model User {
   categories             Category[]
   courses                Course[]
   instructors            Instructor[]
+  dailyCapacities        DailyCapacity[]
 
   @@map("users")
 }
@@ -174,12 +175,43 @@ model EnergyType {
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
-  user  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tasks TaskEnergyType[]
+  user       User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks      TaskEnergyType[]
+  capacities EnergyTypeCapacity[]
 
   @@unique([userId, name])
   @@index([userId, enabled, sortOrder])
   @@map("energy_types")
+}
+
+model DailyCapacity {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  date      String   @db.VarChar(10)
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  energyTypes EnergyTypeCapacity[]
+
+  @@unique([userId, date])
+  @@index([userId, date])
+  @@map("daily_capacities")
+}
+
+model EnergyTypeCapacity {
+  id              String @id @default(uuid()) @db.Uuid
+  dailyCapacityId String @map("daily_capacity_id") @db.Uuid
+  energyTypeId    String @map("energy_type_id") @db.Uuid
+  level           Int
+
+  dailyCapacity DailyCapacity @relation(fields: [dailyCapacityId], references: [id], onDelete: Cascade)
+  energyType    EnergyType    @relation(fields: [energyTypeId], references: [id], onDelete: Cascade)
+
+  @@unique([dailyCapacityId, energyTypeId])
+  @@index([energyTypeId])
+  @@map("energy_type_capacities")
 }
 
 model TaskEnergyType {
