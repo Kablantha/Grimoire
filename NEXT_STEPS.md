@@ -1,16 +1,10 @@
 # Energy Planner Project Status
 
 Current Branch:
-main
+feature/dependencies
 
 Current Phase:
 Phase 7 - Dependencies & Scheduling Constraints
-
-Known issue:
-Prisma upsert() in development-user.ts fails with
-"Unique constraint failed on users_pkey"
-
-Manual findUnique() + create fallback works correctly.
 
 Completed
 
@@ -26,10 +20,10 @@ Completed
 Current Functionality
 
 Tasks
-- Quick Add
-- Editing
-- Completion
-- Archive/restore
+- Create tasks
+- Edit tasks
+- Complete tasks
+- Archive tasks
 - Academic task types
 - Course associations
 - Energy requirements
@@ -42,110 +36,159 @@ Courses
 Capacity
 - Daily capacity tracking
 - Capacity history
-- Energy observations
-- Per-type capacity
+- Energy-type capacity
+- Optional observations
 
 Scheduler Foundation
 - Eligibility engine
-- Constraint evaluation
-- Capacity-aware logic
+- Scheduling reason codes
+- Capacity-aware evaluation
+- Energy-fit evaluation
 - Deadline evaluation
-- Energy fit evaluation
+- Constraint evaluation
 - Scheduler service layer
-- Deterministic rule evaluation
 
-Known Technical Notes
+Current Phase Goals
 
-- Prisma/pg adapter deprecation warning exists during tests.
-- npm "tmp" configuration warning exists.
-- ensureDevelopmentUser still runs from the layout request path.
+Phase 7 - Dependencies & Scheduling Constraints
+
+Implement:
+- Task dependencies
+- Dependency validation
+- Circular dependency prevention
+- Dependency-aware eligibility
+- Dependency visibility
+- Scheduler integration
+
+Do Not Implement:
+- Schedule generation
+- Recommendations
+- Week planning
+- Calendar integration
+- Automatic task assignment
+- Recovery Mode
+- Survival Mode
+
+Current Phase Architectural Direction
+
+Dependencies should integrate into the scheduler foundation.
+
+Scheduler responsibility remains:
+
+"Can this task fit?"
+
+Scheduler does not yet answer:
+
+"Should this task be scheduled?"
+
+Dependency completion is expected to be based primarily on
+task completion state rather than scheduler eligibility.
 
 Version 1.01 Candidates
 
 ## Due Date UX
 
 Problem:
-Date-only deadlines may display unnecessary timestamps.
+Date-only deadlines may display meaningless timestamps.
 
 Potential solution:
-- Date-first UI
+- Date-first presentation
 - Optional time disclosure
 - Hide implicit end-of-day times
-- Show explicitly chosen times
+- Show only explicitly-selected times
 
 Status:
-Version 1.01 review item.
+Deferred.
 
 ## Capacity Check-In UX
 
 Problem:
-Display mode and edit mode appear simultaneously.
+Display and edit modes appear simultaneously.
 
 Potential solution:
+
 Display
 → Update Capacity
 → Edit
 → Save
 → Display
 
-Future possibility:
-Directly editable capacity rows.
+Potential future refinement:
+Inline editing of capacity rows.
 
 Status:
-Version 1.01 review item.
+Deferred.
 
 ## Task Card Polish
 
-Potential review:
-- spacing refinements
+Potential future review:
+- spacing
+- metadata density
 - Details behavior
 - click targets
-- metadata density
 
 Status:
-Version 1.01 review item.
+Deferred.
+
+Technical Debt
+
+## Development User Upsert
+
+Current workaround:
+
+- findUnique()
+- create if missing
+
+Original upsert path causes:
+
+Unique constraint failed on users_pkey
+
+Observed during desktop migration.
+
+Future investigation required.
+
+Known Technical Notes
+
+- Prisma pg adapter warning during tests.
+- npm tmp configuration warning.
+- ensureDevelopmentUser should eventually be reviewed.
 
 Future Ideas
 
 ## Student Hub
 
-Potential future features:
+Goal:
+Provide a friendlier layer over institutional systems.
+
+Potential Features:
 - Class schedules
 - LMS links
 - Campus locations
 - Degree requirements
 - Degree progress
-- Advisor notes
+- Advisor information
 
-Goal:
-Make institutional systems friendlier and less overwhelming.
+Principles:
+- Optional
+- Reduced cognitive load
+- Manual entry first
+- Imports later
 
-Upcoming Phase
+## Gentle Habit Tracking
 
-Phase 7 - Dependencies & Scheduling Constraints
+Potential future product or module.
 
-Goals:
-- Task dependency evaluation
-- Dependency graph logic
-- Circular dependency handling
-- Scheduler integration with eligibility engine
-
-Not Yet Implemented
-
-- Schedule generation
-- Recommendations
-- Week planning
-- Survival Mode
-- Recovery Mode
-- Deadline Intervention
-- Calendar integration
-- Authentication
-- Student Hub
-- Mobile apps
+Principles:
+- No streak pressure
+- No punishment for missed days
+- Progress remains visible
+- ADHD-friendly
+- Accommodates fluctuating capacity
 
 Product Philosophy
 
 Energy Planner should remain:
+
 - calm
 - supportive
 - accessible
@@ -154,8 +197,10 @@ Energy Planner should remain:
 
 Monetization Philosophy
 
-- Web application remains free.
-- No subscriptions.
-- Optional donations only.
-- Donations never unlock features.
-- Core functionality remains available to everyone.
+- Web app remains free
+- No subscriptions
+- Optional donations only
+- No feature-gating
+- No donor-exclusive features
+
+Potential future mobile apps may use a one-time purchase model while keeping the web app free.
