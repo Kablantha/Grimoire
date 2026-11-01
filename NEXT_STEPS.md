@@ -6,6 +6,12 @@ main
 Current Phase:
 Phase 7 - Dependencies & Scheduling Constraints
 
+Known issue:
+Prisma upsert() in development-user.ts fails with
+"Unique constraint failed on users_pkey"
+
+Manual findUnique() + create fallback works correctly.
+
 Completed
 
 - Phase 0 Foundation
