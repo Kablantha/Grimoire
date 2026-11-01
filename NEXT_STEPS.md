@@ -46,6 +46,25 @@ Do not redesign dependency architecture before reviewing the existing implementa
 
 The current implementation already includes dependency validation, persistence, scheduler integration, and task-detail-page dependency management.
 
+Phase 7 Remaining Investigation
+
+Determine where scheduler eligibility results should be surfaced.
+
+Current scheduler outputs include:
+
+- eligible
+- not_ready
+- needs_information
+- infeasible
+
+Dependency-aware reasons already available:
+
+- prerequisite_incomplete
+
+Eligibility engine exists and is tested.
+
+App currently does not appear to display scheduler evaluations.
+
 Current Functionality
 
 Tasks
